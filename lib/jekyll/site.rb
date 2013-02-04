@@ -315,8 +315,8 @@ module Jekyll
         unless self.include.include?(e)
           ['.', '_', '#'].include?(e[0..0]) ||
           e[-1..-1] == '~' ||
-          self.exclude.include?(e) ||
-          File.symlink?(e)
+          self.exclude.glob_include?(e) ||
+          (File.symlink?(e) && self.safe)
         end
       end
     end
