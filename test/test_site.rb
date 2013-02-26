@@ -157,12 +157,28 @@ class TestSite < Test::Unit::TestCase
       @site.exclude = excludes
       assert_equal files, @site.filter_entries(excludes + files)
     end
-    
+
     should "not filter entries within include" do
       includes = %w[_index.html .htaccess]
       files = %w[index.html _index.html .htaccess]
 
       @site.include = includes
+      assert_equal files, @site.filter_entries(files)
+    end
+
+    should "filter symlink entries when safe mode enabled" do
+      stub(Jekyll).configuration do
+        Jekyll::DEFAULTS.merge({'source' => source_dir, 'destination' => dest_dir, 'safe' => true})
+      end
+      site = Site.new(Jekyll.configuration)
+      stub(File).symlink?('symlink.js') {true}
+      files = %w[symlink.js]
+      assert_equal [], site.filter_entries(files)
+    end
+
+    should "not filter symlink entries when safe mode disabled" do
+      stub(File).symlink?('symlink.js') {true}
+      files = %w[symlink.js]
       assert_equal files, @site.filter_entries(files)
     end
 
@@ -181,14 +197,14 @@ class TestSite < Test::Unit::TestCase
         # empty directory
         FileUtils.mkdir(dest_dir('quux'))
       end
-      
+
       teardown do
         FileUtils.rm_f(dest_dir('.htpasswd'))
         FileUtils.rm_f(dest_dir('obsolete.html'))
         FileUtils.rm_rf(dest_dir('qux'))
         FileUtils.rm_f(dest_dir('quux'))
       end
-      
+
       should 'remove orphaned files in destination' do
         @site.process
         assert !File.exist?(dest_dir('.htpasswd'))
@@ -198,7 +214,7 @@ class TestSite < Test::Unit::TestCase
       end
 
     end
-    
+
     context 'with an invalid markdown processor in the configuration' do
       should 'not throw an error at initialization time' do
         bad_processor = 'not a processor name'
@@ -206,7 +222,7 @@ class TestSite < Test::Unit::TestCase
           Site.new(Jekyll.configuration.merge({ 'markdown' => bad_processor }))
         end
       end
-      
+
       should 'throw FatalException at process time' do
         bad_processor = 'not a processor name'
         s = Site.new(Jekyll.configuration.merge({ 'markdown' => bad_processor }))
@@ -215,6 +231,6 @@ class TestSite < Test::Unit::TestCase
         end
       end
     end
-    
+
   end
 end
