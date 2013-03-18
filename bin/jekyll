@@ -10,7 +10,7 @@ Basic Command Line Usage:
   jekyll <path to write generated site>                    # . -> <path>
   jekyll <path to source> <path to write generated site>   # <path> -> <path>
   jekyll import <importer name> <options>                  # imports posts using named import script
-  
+
   Configuration is read from '<source>/_config.yml' but can be overriden
   using the following options:
 
@@ -28,27 +28,27 @@ opts = OptionParser.new do |opts|
   opts.on("--file [PATH]", "File to import from") do |import_file|
     options['file'] = import_file
   end
-  
+
   opts.on("--dbname [TEXT]", "DB to import from") do |import_dbname|
     options['dbname'] = import_dbname
   end
-  
+
   opts.on("--user [TEXT]", "Username to use when importing") do |import_user|
     options['user'] = import_user
   end
-  
+
   opts.on("--pass [TEXT]", "Password to use when importing") do |import_pass|
     options['pass'] = import_pass
   end
-  
+
   opts.on("--host [HOST ADDRESS]", "Host to import from") do |import_host|
     options['host'] = import_host
   end
-  
+
   opts.on("--site [SITE NAME]", "Site to import from") do |import_site|
     options['site'] = import_site
   end
-  
+
 
   opts.on("--[no-]safe", "Safe mode (default unsafe)") do |safe|
     options['safe'] = safe
@@ -86,7 +86,7 @@ opts = OptionParser.new do |opts|
   opts.on("--rdiscount", "Use rdiscount gem for Markdown") do
     options['markdown'] = 'rdiscount'
   end
-  
+
   opts.on("--redcarpet", "Use redcarpet gem for Markdown") do
     options['markdown'] = 'redcarpet'
   end
@@ -170,7 +170,7 @@ if ARGV.size > 0
 
     # It's import time
     puts "Importing..."
-    
+
     # Ideally, this shouldn't be necessary. Maybe parse the actual
     # src files for the migrator name?
     migrators = {
@@ -186,11 +186,11 @@ if ARGV.size > 0
       :tumblr => 'Tumblr',
       :typo => 'Typo'
     }
-    
+
     app_root = File.join(File.dirname(__FILE__), '..')
-    
+
     require "#{app_root}/lib/jekyll/migrators/#{migrator}"
-    
+
     if Jekyll.const_defined?(migrators[migrator.to_sym])
       migrator_class = Jekyll.const_get(migrators[migrator.to_sym])
       migrator_class.process(*cmd_options)
@@ -198,7 +198,7 @@ if ARGV.size > 0
       puts "Invalid migrator. Run `jekyll --help` for assistance."
       exit(1)
     end
-    
+
     exit(0)
   end
 end
@@ -229,7 +229,8 @@ def globs(source)
   Dir.chdir(source) do
     dirs = Dir['*'].select { |x| File.directory?(x) }
     dirs -= ['_site']
-    dirs = dirs.map { |x| "#{x}/**/*" }
+    #dirs = dirs.map { |x| "#{x}/**/*" }
+    dirs = dirs.map { |x| "#{x}/**{/*,/*/**}" }
     dirs += ['*']
   end
 end
